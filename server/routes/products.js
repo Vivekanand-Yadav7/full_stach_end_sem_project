@@ -1,7 +1,6 @@
 const express = require('express');
 const Product = require('../models/Product');
 const { auth, requireRole } = require('../middleware/auth');
-const { upload } = require('../config/cloudinary');
 const router = express.Router();
 
 // GET all products — any authenticated user (retailer or customer)
@@ -23,24 +22,6 @@ router.get('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
-
-// UPLOAD product image to Cloudinary — retailer only
-router.post('/upload', auth, requireRole('retailer'), (req, res, next) => {
-  console.log('Upload request received from user:', req.user._id);
-  upload.single('image')(req, res, function (err) {
-    if (err) {
-      console.error('Multer/Cloudinary error:', err);
-      return res.status(400).json({ message: err.message || 'Image upload failed' });
-    }
-    console.log('File uploaded to Cloudinary:', req.file?.path);
-    next();
-  });
-}, (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No image uploaded' });
-  }
-  res.json({ imageUrl: req.file.path });
 });
 
 // CREATE product — retailer only

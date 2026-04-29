@@ -13,11 +13,14 @@ const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const dashboardRoutes = require('./routes/dashboard');
 
+const path = require('path');
+
 async function startServer() {
   const app = express();
   app.use(express.json());
   app.use(cors());
   app.use(morgan('dev'));
+  app.use('/images', express.static(path.join(__dirname, 'public/images')));
   app.use(passport.initialize());
 
   app.use('/api/auth', authRoutes);

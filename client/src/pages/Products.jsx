@@ -14,31 +14,10 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
     description: '',
     imageUrl: product?.imageUrl || ''
   });
-  const [uploading, setUploading] = useState(false);
-
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formDataToSend = new FormData();
-    formDataToSend.append('image', file);
-
-    setUploading(true);
-    try {
-      const res = await api.post('/products/upload', formDataToSend);
-      setFormData({...formData, imageUrl: res.data.imageUrl});
-      if (addNotification) addNotification('Image uploaded successfully!', 'success');
-    } catch (error) {
-      console.error('Upload Error:', error.response?.data || error);
-      const errorMsg = error.response?.data?.message || error.message || 'Failed to upload image';
-      if (addNotification) {
-        addNotification(errorMsg, 'error');
-      } else {
-        alert(errorMsg);
-      }
-    } finally {
-      setUploading(false);
-    }
+  const getPredecidedImageUrl = (category) => {
+    if (!category) return '';
+    const name = category.toLowerCase().replace(' ', '');
+    return `http://localhost:5000/images/${name}.jpg`;
   };
 
   const handleSubmit = (e) => {
@@ -87,7 +66,14 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
               <select 
                 className="input-field"
                 value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                onChange={(e) => {
+                  const newCategory = e.target.value;
+                  setFormData({
+                    ...formData, 
+                    category: newCategory,
+                    imageUrl: getPredecidedImageUrl(newCategory)
+                  });
+                }}
                 required
               >
                 <option value="">Select...</option>
@@ -110,20 +96,14 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold mb-1 block">Image</label>
-              <div className="flex gap-2 items-center">
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={uploading}
-                  className="input-field !p-1 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                />
-                {uploading && <Loader2 className="animate-spin text-primary" size={20} />}
-              </div>
-              {formData.imageUrl && !uploading && (
-                <div className="mt-2 h-16 w-16 rounded-lg overflow-hidden border border-slate-200">
+              <label className="text-sm font-semibold mb-1 block">Image Preview</label>
+              {formData.imageUrl ? (
+                <div className="mt-2 h-24 w-24 rounded-lg overflow-hidden border border-slate-200">
                   <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="mt-2 h-24 w-24 rounded-lg border border-slate-200 border-dashed flex items-center justify-center text-xs text-slate-400 text-center px-2">
+                  Select a category
                 </div>
               )}
             </div>
@@ -138,7 +118,7 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
               required
             />
           </div>
-          <button type="submit" className="btn-primary w-full" disabled={uploading}>
+          <button type="submit" className="btn-primary w-full">
             {product ? 'Update Product' : 'Create Product'}
           </button>
         </form>

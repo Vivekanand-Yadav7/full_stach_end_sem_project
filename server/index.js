@@ -15,10 +15,13 @@ const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
+const path = require('path');
+
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(passport.initialize());
 
 // Routes

@@ -1,24 +1,44 @@
 const express = require('express');
-const Product = require('../models/Product');
-const Order = require('../models/Order');
+const prisma = require('../config/prisma');
 const { auth, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
 // Retailer dashboard stats
 router.get('/stats', auth, requireRole('retailer'), async (req, res) => {
   try {
-    const totalProducts = await Product.countDocuments();
-    const totalOrders = await Order.countDocuments();
-    const lowStockItems = await Product.find({ quantity: { $lt: 5 } });
+    const totalProducts = await prisma.product.count();
+    const totalOrders = await prisma.order.count();
+    
+    const lowStockItems = await prisma.product.findMany({
+      where: { quantity: { lt: 5 } }
+    });
 
-    const mostOrdered = await Order.aggregate([
-      { $unwind: '$products' },
-      { $group: { _id: '$products.product', count: { $sum: '$products.quantity' } } },
-      { $sort: { count: -1 } },
-      { $limit: 5 },
-      { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productDetails' } },
-      { $unwind: '$productDetails' },
-    ]);
+    const mostOrderedRaw = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: {
+        quantity: true
+      },
+      orderBy: {
+        _sum: {
+          quantity: 'desc'
+        }
+      },
+      take: 5
+    });
+
+    const mostOrderedIds = mostOrderedRaw.map(item => item.productId);
+    const mostOrderedProducts = await prisma.product.findMany({
+      where: { id: { in: mostOrderedIds } }
+    });
+
+    const mostOrdered = mostOrderedRaw.map(item => {
+      const product = mostOrderedProducts.find(p => p.id === item.productId);
+      return {
+        _id: item.productId,
+        count: item._sum.quantity,
+        productDetails: product
+      };
+    });
 
     res.json({ totalProducts, totalOrders, lowStockCount: lowStockItems.length, lowStockItems, mostOrdered });
   } catch (error) {

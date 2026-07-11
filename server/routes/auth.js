@@ -1,7 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const prisma = require('../config/prisma');
 const { auth } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
 const router = express.Router();
@@ -15,16 +16,27 @@ router.post('/register', async (req, res) => {
     const validRoles = ['retailer', 'customer'];
     const userRole = validRoles.includes(role) ? role : 'customer';
 
-    let user = await User.findOne({ email });
+    let user = await prisma.user.findUnique({ where: { email } });
     if (user) return res.status(400).json({ message: 'User already exists with this email' });
 
-    user = new User({ name, email, password, role: userRole });
-    await user.save();
+    let hashedPassword = undefined;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
+    user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: userRole
+      }
+    });
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
     res.status(201).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,16 +48,18 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const isMatch = await user.comparePassword(password);
+    if (!user.password) return res.status(400).json({ message: 'Invalid credentials' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -67,11 +81,10 @@ router.get(
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
   (req, res) => {
     // Generate token
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
-    const userObj = { id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role, avatar: req.user.avatar };
+    const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '7d' });
+    const userObj = { id: req.user.id, name: req.user.name, email: req.user.email, role: req.user.role, avatar: req.user.avatar };
     
     // Redirect to frontend with token
-    // Note: ensure CLIENT_URL is set in your .env file
     res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/oauth-callback?token=${token}&user=${encodeURIComponent(JSON.stringify(userObj))}`);
   }
 );
@@ -88,10 +101,14 @@ router.put('/avatar', auth, (req, res, next) => {
 }, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
-    const user = await User.findById(req.user.id || req.user._id);
+    let user = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ message: 'User not found' });
-    user.avatar = req.file.path;
-    await user.save();
+    
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { avatar: req.file.path }
+    });
+    
     res.json({ avatar: user.avatar });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -99,3 +116,4 @@ router.put('/avatar', auth, (req, res, next) => {
 });
 
 module.exports = router;
+

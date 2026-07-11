@@ -1,10 +1,9 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const passport = require('passport');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const prisma = require('./config/prisma');
 
 require('./config/passport');
 
@@ -29,12 +28,10 @@ async function startServer() {
   app.use('/api/dashboard', dashboardRoutes);
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-
-  const mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
   
-  await mongoose.connect(uri);
-  console.log('Connected to In-Memory MongoDB');
+  // Test DB connection
+  await prisma.$connect();
+  console.log('Connected to PostgreSQL via Prisma');
 
   const PORT = 5000;
   app.listen(PORT, () => console.log(`Test server running on port ${PORT}`));

@@ -1,6 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/User');
+const prisma = require('./prisma');
 
 passport.use(
   new GoogleStrategy(
@@ -12,7 +12,7 @@ passport.use(
     },
     async (req, accessToken, refreshToken, profile, done) => {
       try {
-        let user = await User.findOne({ googleId: profile.id });
+        let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
 
         if (user) {
           return done(null, user);
@@ -20,24 +20,28 @@ passport.use(
 
         // Check if user exists with the same email
         if (profile.emails && profile.emails.length > 0) {
-          user = await User.findOne({ email: profile.emails[0].value });
+          const email = profile.emails[0].value;
+          user = await prisma.user.findUnique({ where: { email } });
           if (user) {
-            user.googleId = profile.id;
-            await user.save();
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: { googleId: profile.id }
+            });
             return done(null, user);
           }
         }
 
         // Create new user if not found
         const role = req.query.state || 'customer';
-        user = new User({
-          name: profile.displayName,
-          email: profile.emails ? profile.emails[0].value : `${profile.id}@google.com`,
-          googleId: profile.id,
-          role: role
+        user = await prisma.user.create({
+          data: {
+            name: profile.displayName,
+            email: profile.emails ? profile.emails[0].value : `${profile.id}@google.com`,
+            googleId: profile.id,
+            role: role
+          }
         });
 
-        await user.save();
         done(null, user);
       } catch (error) {
         done(error, false);

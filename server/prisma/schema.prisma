@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String?
+  googleId  String?  @unique
+  avatar    String?  @default("")
+  role      String   @default("customer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  price       Float
+  category    String
+  quantity    Int         @default(0)
+  description String
+  imageUrl    String?     @default("https://via.placeholder.com/150")
+  seller      String?
+  ingredients String[]
+  nutrition   String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  totalAmount  Float
+  status       String      @default("pending")
+  placedById   String
+  placedBy     User        @relation(fields: [placedById], references: [id])
+  customerName String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  products     OrderItem[]
+}
+
+model OrderItem {
+  id           String  @id @default(uuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity     Int
+  price        Float
+  productName  String?
+  productImage String?
+}

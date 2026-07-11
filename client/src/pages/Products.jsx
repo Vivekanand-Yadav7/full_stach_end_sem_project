@@ -6,13 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNotification } from '../context/NotificationContext';
 
 const ProductModal = ({ product, onClose, onSave, addNotification }) => {
-  const [formData, setFormData] = useState(product || {
-    name: '',
-    price: '',
-    category: '',
-    quantity: '',
-    description: '',
-    imageUrl: product?.imageUrl || ''
+  const [formData, setFormData] = useState({
+    name: product?.name || '',
+    price: product?.price || '',
+    category: product?.category || '',
+    quantity: product?.quantity || '',
+    description: product?.description || '',
+    imageUrl: product?.imageUrl || '',
+    seller: product?.seller || '',
+    ingredients: product?.ingredients ? product.ingredients.join(', ') : '',
+    nutrition: product?.nutrition ? product.nutrition.join(', ') : ''
   });
   const getPredecidedImageUrl = (category) => {
     if (!category) return '';
@@ -22,7 +25,13 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      price: parseFloat(formData.price),
+      quantity: parseInt(formData.quantity, 10),
+      ingredients: typeof formData.ingredients === 'string' ? formData.ingredients.split(',').map(s => s.trim()).filter(s => s) : formData.ingredients,
+      nutrition: typeof formData.nutrition === 'string' ? formData.nutrition.split(',').map(s => s.trim()).filter(s => s) : formData.nutrition
+    });
   };
 
   return (
@@ -107,6 +116,34 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
                 </div>
               )}
             </div>
+          </div>
+          <div>
+            <label className="text-sm font-semibold mb-1 block">Seller</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="e.g. ABC Cafe"
+              value={formData.seller}
+              onChange={(e) => setFormData({...formData, seller: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-semibold mb-1 block">Ingredients (comma separated)</label>
+            <textarea 
+              className="input-field h-16 resize-none" 
+              placeholder="Paneer, Whole Wheat Bread, Butter"
+              value={formData.ingredients}
+              onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-semibold mb-1 block">Nutrition (comma separated)</label>
+            <textarea 
+              className="input-field h-16 resize-none" 
+              placeholder="Protein: 20g, Calories: 320"
+              value={formData.nutrition}
+              onChange={(e) => setFormData({...formData, nutrition: e.target.value})}
+            />
           </div>
           <div>
             <label className="text-sm font-semibold mb-1 block">Description</label>

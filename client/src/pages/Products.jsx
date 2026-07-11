@@ -39,16 +39,16 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="glass-card w-full max-w-lg relative"
+        className="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
       >
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full">
+        <button type="button" onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full">
           <X size={20} />
         </button>
         <h2 className="text-2xl font-bold mb-6">{product ? 'Edit Product' : 'Add New Product'}</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
               <label className="text-sm font-semibold mb-1 block">Product Name</label>
               <input 
                 type="text" 
@@ -105,6 +105,34 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
               />
             </div>
             <div>
+              <label className="text-sm font-semibold mb-1 block">Seller</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="e.g. ABC Cafe"
+                value={formData.seller}
+                onChange={(e) => setFormData({...formData, seller: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-1 block">Ingredients (comma separated)</label>
+              <textarea 
+                className="input-field h-24 resize-none" 
+                placeholder="Paneer, Whole Wheat Bread, Butter"
+                value={formData.ingredients}
+                onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-1 block">Nutrition (comma separated)</label>
+              <textarea 
+                className="input-field h-24 resize-none" 
+                placeholder="Protein: 20g, Calories: 320"
+                value={formData.nutrition}
+                onChange={(e) => setFormData({...formData, nutrition: e.target.value})}
+              />
+            </div>
+            <div className="md:col-span-2">
               <label className="text-sm font-semibold mb-1 block">Image Preview</label>
               {formData.imageUrl ? (
                 <div className="mt-2 h-24 w-24 rounded-lg overflow-hidden border border-slate-200">
@@ -116,44 +144,16 @@ const ProductModal = ({ product, onClose, onSave, addNotification }) => {
                 </div>
               )}
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-semibold mb-1 block">Seller</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="e.g. ABC Cafe"
-              value={formData.seller}
-              onChange={(e) => setFormData({...formData, seller: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold mb-1 block">Ingredients (comma separated)</label>
-            <textarea 
-              className="input-field h-16 resize-none" 
-              placeholder="Paneer, Whole Wheat Bread, Butter"
-              value={formData.ingredients}
-              onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold mb-1 block">Nutrition (comma separated)</label>
-            <textarea 
-              className="input-field h-16 resize-none" 
-              placeholder="Protein: 20g, Calories: 320"
-              value={formData.nutrition}
-              onChange={(e) => setFormData({...formData, nutrition: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold mb-1 block">Description</label>
-            <textarea 
-              className="input-field h-24 resize-none" 
-              placeholder="Short description..."
-              value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              required
-            />
+            <div className="md:col-span-2">
+              <label className="text-sm font-semibold mb-1 block">Description</label>
+              <textarea 
+                className="input-field h-24 resize-none" 
+                placeholder="Short description..."
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                required
+              />
+            </div>
           </div>
           <button type="submit" className="btn-primary w-full">
             {product ? 'Update Product' : 'Create Product'}

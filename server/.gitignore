@@ -6,3 +6,4 @@ node_modules
 
 # test scripts
 test-ingest.js
+test-retrieve.js

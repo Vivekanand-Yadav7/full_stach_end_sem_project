@@ -2,6 +2,9 @@ const client = require("../config/qdrant.js");
 
 const COLLECTION = "products";
 
+/**
+ * Creates the collection if it doesn't already exist.
+ */
 async function ensureCollection(size) {
     const collections = await client.getCollections();
 
@@ -21,6 +24,10 @@ async function ensureCollection(size) {
     console.log(`✅ Collection '${COLLECTION}' created.`);
 }
 
+/**
+ * Stores (or updates) a product vector.
+ * Uses productId as the Qdrant point id.
+ */
 async function saveProductVector(
     productId,
     embedding,
@@ -47,6 +54,9 @@ async function saveProductVector(
     }
 }
 
+/**
+ * Deletes a product vector.
+ */
 async function deleteProductVector(productId) {
     try {
         await client.delete(COLLECTION, {
@@ -61,6 +71,11 @@ async function deleteProductVector(productId) {
     }
 }
 
+/**
+ * Performs semantic search.
+ *
+ * Returns the top matching products.
+ */
 async function searchProducts(
     queryEmbedding,
     limit = 10,

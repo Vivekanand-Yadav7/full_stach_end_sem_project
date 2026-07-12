@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const dashboardRoutes = require('./routes/dashboard');
+const smartSearchRoutes = require('./routes/smartSearch');
 
 const path = require('path');
 
@@ -26,6 +27,7 @@ async function startServer() {
   app.use('/api/products', productRoutes);
   app.use('/api/orders', orderRoutes);
   app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/smart-search', smartSearchRoutes);
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
   

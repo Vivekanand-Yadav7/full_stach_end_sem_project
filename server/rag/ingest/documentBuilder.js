@@ -1,4 +1,4 @@
-export const createProductDocument = (product) => {
+const createProductDocument = (product) => {
     return `
 Product Name: ${product.name}
 
@@ -21,3 +21,5 @@ Price:
 ₹${product.price}
 `.trim();
 };
+
+module.exports = { createProductDocument };

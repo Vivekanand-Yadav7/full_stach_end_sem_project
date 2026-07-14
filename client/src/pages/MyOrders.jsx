@@ -58,7 +58,7 @@ const MyOrders = () => {
         <div className="space-y-4">
           {orders.map((order, index) => (
             <motion.div
-              key={order._id}
+              key={order.id || order._id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -87,7 +87,7 @@ const MyOrders = () => {
 
                   <div>
                     <p className="font-bold text-slate-800">
-                      Order #{order._id.slice(-8).toUpperCase()}
+                      Order #{(order.id || order._id).slice(-8).toUpperCase()}
                     </p>
                     <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
                       <Calendar size={12} />

@@ -1,168 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Search, Filter, Edit2, Trash2, X, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Edit2, Trash2, X, Loader2, Sparkles, Bot, Send } from 'lucide-react';
 import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useNotification } from '../context/NotificationContext';
 
-const ProductModal = ({ product, onClose, onSave, addNotification }) => {
-  const [formData, setFormData] = useState({
-    name: product?.name || '',
-    price: product?.price || '',
-    category: product?.category || '',
-    quantity: product?.quantity || '',
-    description: product?.description || '',
-    imageUrl: product?.imageUrl || '',
-    seller: product?.seller || '',
-    ingredients: product?.ingredients ? product.ingredients.join(', ') : '',
-    nutrition: product?.nutrition ? product.nutrition.join(', ') : ''
-  });
-  const getPredecidedImageUrl = (category) => {
-    if (!category) return '';
-    const name = category.toLowerCase().replace(' ', '');
-    return `http://localhost:5000/images/${name}.jpg`;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({
-      ...formData,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity, 10),
-      ingredients: typeof formData.ingredients === 'string' ? formData.ingredients.split(',').map(s => s.trim()).filter(s => s) : formData.ingredients,
-      nutrition: typeof formData.nutrition === 'string' ? formData.nutrition.split(',').map(s => s.trim()).filter(s => s) : formData.nutrition
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
-      >
-        <button type="button" onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full">
-          <X size={20} />
-        </button>
-        <h2 className="text-2xl font-bold mb-6">{product ? 'Edit Product' : 'Add New Product'}</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="text-sm font-semibold mb-1 block">Product Name</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Delicious Burger"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Price ($)</label>
-              <input 
-                type="number" 
-                className="input-field" 
-                placeholder="12.99"
-                value={formData.price}
-                onChange={(e) => setFormData({...formData, price: e.target.value})}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Category</label>
-              <select 
-                className="input-field"
-                value={formData.category}
-                onChange={(e) => {
-                  const newCategory = e.target.value;
-                  setFormData({
-                    ...formData, 
-                    category: newCategory,
-                    imageUrl: getPredecidedImageUrl(newCategory)
-                  });
-                }}
-                required
-              >
-                <option value="">Select...</option>
-                <option value="Burger">Burger</option>
-                <option value="Sea Food">Sea Food</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Steak">Steak</option>
-                <option value="Pizza">Pizza</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Quantity</label>
-              <input 
-                type="number" 
-                className="input-field" 
-                placeholder="50"
-                value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Seller</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="e.g. ABC Cafe"
-                value={formData.seller}
-                onChange={(e) => setFormData({...formData, seller: e.target.value})}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Ingredients (comma separated)</label>
-              <textarea 
-                className="input-field h-24 resize-none" 
-                placeholder="Paneer, Whole Wheat Bread, Butter"
-                value={formData.ingredients}
-                onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold mb-1 block">Nutrition (comma separated)</label>
-              <textarea 
-                className="input-field h-24 resize-none" 
-                placeholder="Protein: 20g, Calories: 320"
-                value={formData.nutrition}
-                onChange={(e) => setFormData({...formData, nutrition: e.target.value})}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-sm font-semibold mb-1 block">Image Preview</label>
-              {formData.imageUrl ? (
-                <div className="mt-2 h-24 w-24 rounded-lg overflow-hidden border border-slate-200">
-                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="mt-2 h-24 w-24 rounded-lg border border-slate-200 border-dashed flex items-center justify-center text-xs text-slate-400 text-center px-2">
-                  Select a category
-                </div>
-              )}
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-sm font-semibold mb-1 block">Description</label>
-              <textarea 
-                className="input-field h-24 resize-none" 
-                placeholder="Short description..."
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                required
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn-primary w-full">
-            {product ? 'Update Product' : 'Create Product'}
-          </button>
-        </form>
-      </motion.div>
-    </div>
-  );
-};
+import ProductModal from '../components/ProductModal';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -172,6 +15,12 @@ const Products = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
 
   const { addNotification } = useNotification();
+
+  // Smart Search state
+  const [isSmartOpen, setIsSmartOpen] = useState(false);
+  const [smartQuery, setSmartQuery] = useState('');
+  const [smartResult, setSmartResult] = useState(null);
+  const [smartLoading, setSmartLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -216,8 +65,23 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
+  const handleSmartSearch = async (e) => {
+    e.preventDefault();
+    if (!smartQuery.trim()) return;
+    setSmartLoading(true);
+    setSmartResult(null);
+    try {
+      const res = await api.post('/smart-search', { query: smartQuery, limit: 5 });
+      setSmartResult(res.data.recommendation);
+    } catch (err) {
+      setSmartResult('❌ ' + (err.response?.data?.message || 'Smart search failed.'));
+    } finally {
+      setSmartLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.category.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -228,13 +92,23 @@ const Products = () => {
           <h1 className="text-3xl font-bold text-slate-800">Products</h1>
           <p className="text-slate-500">Manage your menu items and stock levels.</p>
         </div>
-        <button 
-          onClick={() => { setCurrentProduct(null); setIsModalOpen(true); }}
-          className="btn-primary flex items-center gap-2 justify-center"
-        >
-          <Plus size={20} />
-          Add Product
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            id="retailer-smart-search-btn"
+            onClick={() => { setIsSmartOpen(true); setSmartResult(null); setSmartQuery(''); }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-sm font-semibold shadow-lg shadow-violet-200 hover:opacity-90 transition-opacity"
+          >
+            <Sparkles size={16} />
+            AI Preview
+          </button>
+          <button
+            onClick={() => { setCurrentProduct(null); setIsModalOpen(true); }}
+            className="btn-primary flex items-center gap-2 justify-center"
+          >
+            <Plus size={20} />
+            Add Product
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-4">
@@ -306,13 +180,88 @@ const Products = () => {
       </div>
 
       {isModalOpen && (
-        <ProductModal 
-          product={currentProduct} 
-          onClose={() => setIsModalOpen(false)} 
-          onSave={handleSave} 
+        <ProductModal
+          product={currentProduct}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave}
           addNotification={addNotification}
         />
       )}
+
+      {/* Smart Search Drawer */}
+      <AnimatePresence>
+        {isSmartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50"
+              onClick={() => setIsSmartOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col"
+            >
+              <div className="p-6 border-b border-violet-100 flex justify-between items-center bg-gradient-to-r from-violet-50 to-indigo-50">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-violet-700">
+                  <Bot size={22} className="text-violet-500" />
+                  AI Preview
+                </h2>
+                <button onClick={() => setIsSmartOpen(false)} className="p-2 hover:bg-white/70 rounded-full">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <p className="text-sm text-slate-500">
+                  See how customers will experience AI search on your products. Try sample queries!
+                </p>
+                {smartLoading && (
+                  <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <Loader2 className="animate-spin text-violet-500" size={36} />
+                    <p className="text-sm text-slate-400">AI is thinking...</p>
+                  </div>
+                )}
+                {smartResult && !smartLoading && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl p-5"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={16} className="text-violet-500" />
+                      <span className="text-sm font-bold text-violet-600">AI Recommendation</span>
+                    </div>
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{smartResult}</p>
+                  </motion.div>
+                )}
+              </div>
+              <form onSubmit={handleSmartSearch} className="p-6 border-t border-violet-100 space-y-3">
+                <textarea
+                  id="retailer-smart-search-input"
+                  className="w-full resize-none rounded-2xl border border-violet-200 bg-violet-50/50 p-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-300 h-24"
+                  placeholder="e.g. spicy vegetarian burger..."
+                  value={smartQuery}
+                  onChange={(e) => setSmartQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSmartSearch(e); } }}
+                />
+                <button
+                  id="retailer-smart-search-submit"
+                  type="submit"
+                  disabled={smartLoading || !smartQuery.trim()}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-violet-200 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {smartLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {smartLoading ? 'Searching...' : 'Ask AI'}
+                </button>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

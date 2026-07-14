@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Package, ShoppingCart, AlertTriangle, TrendingUp } from 'lucide-react';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
+import { useNotification } from '../context/NotificationContext';
+import ProductModal from '../components/ProductModal';
 
 const StatCard = ({ title, value, icon, color, delay }) => (
   <motion.div
@@ -23,6 +25,9 @@ const StatCard = ({ title, value, icon, color, delay }) => (
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const { addNotification } = useNotification();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -37,6 +42,34 @@ const Dashboard = () => {
     };
     fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/dashboard/stats');
+      setStats(res.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (data) => {
+    try {
+      if (currentProduct) {
+        await api.put(`/products/${currentProduct.id || currentProduct._id}`, data);
+      } else {
+        await api.post('/products', data);
+      }
+      fetchStats();
+      setIsModalOpen(false);
+      setCurrentProduct(null);
+      addNotification(`Product ${currentProduct ? 'updated' : 'created'} successfully!`);
+    } catch (error) {
+      addNotification(error.response?.data?.message || 'Error saving product', 'error');
+    }
+  };
 
   if (loading) return <div className="flex items-center justify-center h-full text-primary font-bold">Loading Dashboard...</div>;
 
@@ -94,7 +127,12 @@ const Dashboard = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-slate-500">Only {item.quantity} left</p>
-                    <button className="text-xs text-primary font-bold hover:underline">Restock</button>
+                    <button 
+                      onClick={() => { setCurrentProduct(item); setIsModalOpen(true); }}
+                      className="text-xs text-primary font-bold hover:underline"
+                    >
+                      Restock
+                    </button>
                   </div>
                 </div>
               ))
@@ -125,6 +163,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      
+      {isModalOpen && (
+        <ProductModal
+          product={currentProduct}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 };

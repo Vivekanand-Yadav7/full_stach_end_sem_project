@@ -62,3 +62,21 @@ model OrderItem {
   productName  String?
   productImage String?
 }
+
+model FoodCoOccurrence {
+  id        String   @id @default(uuid())
+  foodA     String
+  foodB     String
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([foodA, foodB])
+}
+
+model UserEmbedding {
+  userId    String   @id
+  embedding Float[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

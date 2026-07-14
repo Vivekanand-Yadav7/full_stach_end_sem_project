@@ -1,6 +1,8 @@
 const express = require('express');
 const prisma = require('../config/prisma');
 const { auth, requireRole } = require('../middleware/auth');
+const { indexProduct } = require('../rag/ingest/indexProduct');
+const { deleteProductVector } = require('../rag/ingest/vectorStore');
 const router = express.Router();
 
 // GET all products — any authenticated user (retailer or customer)
@@ -33,6 +35,7 @@ router.post('/', auth, requireRole('retailer'), async (req, res) => {
     const product = await prisma.product.create({
       data: req.body
     });
+    await indexProduct(product).catch(err => console.error("Qdrant index error:", err));
     res.status(201).json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -46,6 +49,7 @@ router.put('/:id', auth, requireRole('retailer'), async (req, res) => {
       where: { id: req.params.id },
       data: req.body
     });
+    await indexProduct(product).catch(err => console.error("Qdrant index error:", err));
     res.json(product);
   } catch (error) {
     if (error.code === 'P2025') {
@@ -61,6 +65,7 @@ router.delete('/:id', auth, requireRole('retailer'), async (req, res) => {
     await prisma.product.delete({
       where: { id: req.params.id }
     });
+    await deleteProductVector(req.params.id).catch(err => console.error("Qdrant delete error:", err));
     res.json({ message: 'Product deleted' });
   } catch (error) {
     if (error.code === 'P2025') {

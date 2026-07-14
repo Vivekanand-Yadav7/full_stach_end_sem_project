@@ -95,6 +95,9 @@ async function searchProducts(
 
         return results;
     } catch (error) {
+        if (error.status === 404 || (error.message && error.message.includes("Not found"))) {
+            return [];
+        }
         console.error("Error searching products:", error);
         throw error;
     }

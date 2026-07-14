@@ -13,12 +13,12 @@ async function indexProduct(product) {
         embedding,
         {
             productId: product.id,
-            sellerId: product.sellerId,
-            restaurantId: product.restaurantId,
-            category: product.category,
             name: product.name,
-            veg: product.veg,
-            available: product.available
+            category: product.category,
+            price: product.price,
+            quantity: product.quantity,
+            description: product.description,
+            seller: product.seller
         }
     );
 }

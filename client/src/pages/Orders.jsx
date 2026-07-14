@@ -31,7 +31,7 @@ const Orders = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const res = await api.put(`/orders/${orderId}/status`, { status: newStatus });
-      setOrders(orders.map(o => o._id === orderId ? res.data : o));
+      setOrders(orders.map(o => (o.id || o._id) === orderId ? res.data : o));
       addNotification('Order status updated successfully');
     } catch (error) {
       console.error(error);
@@ -44,7 +44,7 @@ const Orders = () => {
 
     const headers = ['Order ID', 'Customer', 'Date', 'Items Count', 'Total Amount', 'Status'];
     const rows = orders.map((o) => [
-      o._id,
+      o.id || o._id,
       o.customerName || o.placedBy?.name || 'Unknown',
       new Date(o.createdAt).toLocaleDateString(),
       o.products.length,
@@ -110,14 +110,14 @@ const Orders = () => {
               <tbody className="divide-y divide-primary/5">
                 {orders.map((order, index) => (
                   <motion.tr
-                    key={order._id}
+                    key={order.id || order._id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.03 }}
                     className="hover:bg-slate-50/80 transition-colors"
                   >
                     <td className="px-6 py-4 font-mono text-xs text-slate-400">
-                      #{order._id.slice(-8).toUpperCase()}
+                      #{(order.id || order._id).slice(-8).toUpperCase()}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex -space-x-2">
@@ -165,7 +165,7 @@ const Orders = () => {
                     <td className="px-6 py-4">
                       <select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        onChange={(e) => handleStatusChange(order.id || order._id, e.target.value)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize focus:outline-none border-2 border-transparent hover:border-slate-200 transition-colors cursor-pointer appearance-none ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
                           order.status === 'cancelled' ? 'bg-red-100 text-red-700' :

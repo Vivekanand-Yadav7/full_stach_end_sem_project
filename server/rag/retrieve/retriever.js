@@ -9,12 +9,19 @@ async function retrieveProducts(query, limit = 10) {
 
     const results = await searchProducts(queryEmbedding, limit);
 
+    // Extract product IDs from Qdrant results
+    const productIds = results
+        .map((r) => r.payload?.productId)
+        .filter(Boolean);
+
     const prompt = buildPrompt(query, results);
 
     const response = await llm.invoke(prompt);
 
-    return response;
+    return {
+        recommendation: response.content ?? response,
+        productIds,
+    };
 }
 
 module.exports = { retrieveProducts };
-

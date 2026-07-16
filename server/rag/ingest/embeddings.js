@@ -1,4 +1,4 @@
-const { embeddings } = require("../config/ollama.js");
+const { embeddings } = require("../config/gemini.js");
 
 async function generateEmbedding(text) {
     try {

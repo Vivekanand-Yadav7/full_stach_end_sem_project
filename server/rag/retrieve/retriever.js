@@ -1,6 +1,6 @@
 const { generateEmbedding } = require("../ingest/embeddings.js");
 const { searchProducts } = require("../ingest/vectorStore.js");
-const { llm } = require("../config/ollama.js");
+const { llm } = require("../config/gemini.js");
 const { buildPrompt } = require("./prompt.js");
 
 async function retrieveProducts(query, limit = 10) {

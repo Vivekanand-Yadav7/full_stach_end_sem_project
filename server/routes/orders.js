@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../config/prisma');
 const { auth, requireRole } = require('../middleware/auth');
+const { updateCoOccurrence, updateUserProfile } = require('../rag/recommend');
 const router = express.Router();
 
 // GET orders — retailer sees all, customer sees their own
@@ -98,6 +99,14 @@ router.post('/', auth, async (req, res) => {
     });
 
     res.status(201).json(order);
+
+    // Asynchronously update recommendation models (fire-and-forget)
+    try {
+      updateCoOccurrence(order).catch(err => console.error('Error updating co-occurrence:', err.message));
+      updateUserProfile(req.user.id).catch(err => console.error('Error updating user profile:', err.message));
+    } catch (err) {
+      console.error('Error initiating recommendation updates:', err.message);
+    }
   } catch (error) {
     console.error('Order creation failed:', error.message);
     res.status(400).json({ message: error.message });

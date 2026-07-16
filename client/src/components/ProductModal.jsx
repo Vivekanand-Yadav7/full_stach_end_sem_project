@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getBaseUrl } from '../api/axios';
 
 const ProductModal = ({ product, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
   const getPredecidedImageUrl = (category) => {
     if (!category) return '';
     const name = category.toLowerCase().replace(' ', '');
-    return `http://localhost:5000/images/${name}.jpg`;
+    return `${getBaseUrl()}/images/${name}.jpg`;
   };
 
   const handleSubmit = (e) => {
@@ -89,6 +90,10 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 <option value="Dessert">Dessert</option>
                 <option value="Steak">Steak</option>
                 <option value="Pizza">Pizza</option>
+                <option value="Salad">Salad</option>
+                <option value="Beverage">Beverage</option>
+                <option value="Pasta">Pasta</option>
+                <option value="Sushi">Sushi</option>
               </select>
             </div>
             <div>

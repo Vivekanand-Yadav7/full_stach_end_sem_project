@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNotification } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['all', 'Burger', 'Sea Food', 'Dessert', 'Steak', 'Pizza'];
+const CATEGORIES = ['all', 'Burger', 'Sea Food', 'Dessert', 'Steak', 'Pizza', 'Salad', 'Beverage', 'Pasta', 'Sushi'];
 
 const Shop = () => {
   const [products, setProducts] = useState([]);

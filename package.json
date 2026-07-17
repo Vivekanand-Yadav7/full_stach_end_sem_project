@@ -1,5 +1,14 @@
 {
-  "dependencies": {
-    "@qdrant/js-client-rest": "^1.18.0"
+  "name": "invenorder",
+  "version": "1.0.0",
+  "description": "InvenOrder — Full-stack inventory & order management with AI-powered smart search",
+  "scripts": {
+    "build": "cd server && npm install && cd ../client && npm install && npm run build",
+    "start": "node server/index.js",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

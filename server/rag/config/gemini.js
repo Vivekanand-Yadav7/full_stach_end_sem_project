@@ -1,11 +1,11 @@
-const { GoogleGenAIEmbeddings, ChatGoogleGenAI } = require("@langchain/google-genai");
+const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 
-const embeddings = new GoogleGenAIEmbeddings({
-    model: "text-embedding-004",
+const embeddings = new GoogleGenerativeAIEmbeddings({
+    model: "gemini-embedding-001",  // 768d — compatible with existing Qdrant collection
 });
 
-const llm = new ChatGoogleGenAI({
-    model: "gemini-2.5-flash",
+const llm = new ChatGoogleGenerativeAI({
+    model: "gemini-flash-latest",   // gemini-2.5-flash not available for new API keys
     temperature: 0,
 });
 

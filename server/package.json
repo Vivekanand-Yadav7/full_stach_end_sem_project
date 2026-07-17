@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon test-server.js",
     "start": "node index.js",
+    "postinstall": "npx prisma generate",
     "build": "npm install && cd ../client && npm install && npm run build"
   },
   "keywords": [],

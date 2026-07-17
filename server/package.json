@@ -8,7 +8,7 @@
     "dev": "nodemon test-server.js",
     "start": "node index.js",
     "postinstall": "npx prisma generate",
-    "build": "npm install && cd ../client && npm install && npm run build"
+    "build": "echo 'Server build complete. Prisma generation is handled in postinstall.'"
   },
   "keywords": [],
   "author": "",

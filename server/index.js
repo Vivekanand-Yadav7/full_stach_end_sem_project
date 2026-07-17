@@ -16,6 +16,7 @@ const orderRoutes = require('./routes/orders');
 const dashboardRoutes = require('./routes/dashboard');
 const smartSearchRoutes = require('./routes/smartSearch');
 const recommendRoutes = require('./routes/recommend');
+const seedRoutes = require('./routes/seed');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/smart-search', smartSearchRoutes);
 app.use('/api/recommend', recommendRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

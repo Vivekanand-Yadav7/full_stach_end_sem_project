@@ -17,7 +17,12 @@ const ProductModal = ({ product, onClose, onSave }) => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-
+  const toTitleCase = (val) => {
+    if (!val) return '';
+    return val.split(' ').map(word => 
+      word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''
+    ).join(' ');
+  };
 
 
   const handleSubmit = async (e) => {
@@ -70,7 +75,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 className="input-field" 
                 placeholder="Delicious Burger"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({...formData, name: toTitleCase(e.target.value)})}
                 required
               />
             </div>
@@ -92,13 +97,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 className="input-field"
                 placeholder="e.g. Sea Food"
                 value={formData.category}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const titleCased = val.split(' ').map(word => 
-                    word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''
-                  ).join(' ');
-                  setFormData({...formData, category: titleCased});
-                }}
+                onChange={(e) => setFormData({...formData, category: toTitleCase(e.target.value)})}
                 required
               />
             </div>
@@ -120,7 +119,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 className="input-field" 
                 placeholder="e.g. ABC Cafe"
                 value={formData.seller}
-                onChange={(e) => setFormData({...formData, seller: e.target.value})}
+                onChange={(e) => setFormData({...formData, seller: toTitleCase(e.target.value)})}
               />
             </div>
             <div>
@@ -129,7 +128,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 className="input-field h-24 resize-none" 
                 placeholder="Paneer, Whole Wheat Bread, Butter"
                 value={formData.ingredients}
-                onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
+                onChange={(e) => setFormData({...formData, ingredients: toTitleCase(e.target.value)})}
               />
             </div>
             <div>
@@ -138,7 +137,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                 className="input-field h-24 resize-none" 
                 placeholder="Protein: 20g, Calories: 320"
                 value={formData.nutrition}
-                onChange={(e) => setFormData({...formData, nutrition: e.target.value})}
+                onChange={(e) => setFormData({...formData, nutrition: toTitleCase(e.target.value)})}
               />
             </div>
             <div className="md:col-span-2">

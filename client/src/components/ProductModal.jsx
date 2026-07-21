@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, UploadCloud, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getBaseUrl } from '../api/axios';
+import api, { getBaseUrl } from '../api/axios';
 
 const ProductModal = ({ product, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +15,8 @@ const ProductModal = ({ product, onClose, onSave }) => {
     ingredients: product?.ingredients ? product.ingredients.join(', ') : '',
     nutrition: product?.nutrition ? product.nutrition.join(', ') : ''
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const getPredecidedImageUrl = (category) => {
     if (!category) return '';
@@ -22,10 +24,28 @@ const ProductModal = ({ product, onClose, onSave }) => {
     return `${getBaseUrl()}/images/${name}.jpg`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    let finalImageUrl = formData.imageUrl;
+
+    if (imageFile) {
+      setIsUploading(true);
+      const uploadData = new FormData();
+      uploadData.append('image', imageFile);
+      try {
+        const res = await api.post('/products/upload-image', uploadData);
+        finalImageUrl = res.data.imageUrl;
+      } catch (err) {
+        console.error('Image upload failed:', err);
+        const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message;
+        alert(`Image upload failed: ${errorMsg}\nFalling back to previous image URL`);
+      }
+      setIsUploading(false);
+    }
+
     onSave({
       ...formData,
+      imageUrl: finalImageUrl,
       price: parseFloat(formData.price),
       quantity: parseInt(formData.quantity, 10),
       ingredients: typeof formData.ingredients === 'string' ? formData.ingredients.split(',').map(s => s.trim()).filter(s => s) : formData.ingredients,
@@ -136,16 +156,40 @@ const ProductModal = ({ product, onClose, onSave }) => {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold mb-1 block">Image Preview</label>
-              {formData.imageUrl ? (
-                <div className="mt-2 h-24 w-24 rounded-lg overflow-hidden border border-slate-200">
-                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <label className="text-sm font-semibold mb-1 block">Product Image</label>
+              <div className="flex items-center gap-4 mt-2">
+                {imageFile ? (
+                  <div className="h-24 w-24 rounded-lg overflow-hidden border border-slate-200 shrink-0">
+                    <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                ) : formData.imageUrl ? (
+                  <div className="h-24 w-24 rounded-lg overflow-hidden border border-slate-200 shrink-0">
+                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-24 w-24 rounded-lg border border-slate-200 border-dashed flex items-center justify-center text-xs text-slate-400 text-center px-2 shrink-0">
+                    No image
+                  </div>
+                )}
+                
+                <div className="flex-1">
+                  <label className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-50 border border-slate-200 border-dashed rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+                    <UploadCloud size={20} className="text-slate-400" />
+                    <span className="text-sm font-medium text-slate-600">Click to upload image</span>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files[0]) {
+                          setImageFile(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="text-xs text-slate-400 mt-2">Uploading replaces the pre-decided category image.</p>
                 </div>
-              ) : (
-                <div className="mt-2 h-24 w-24 rounded-lg border border-slate-200 border-dashed flex items-center justify-center text-xs text-slate-400 text-center px-2">
-                  Select a category
-                </div>
-              )}
+              </div>
             </div>
             <div className="md:col-span-2">
               <label className="text-sm font-semibold mb-1 block">Description</label>
@@ -158,8 +202,9 @@ const ProductModal = ({ product, onClose, onSave }) => {
               />
             </div>
           </div>
-          <button type="submit" className="btn-primary w-full">
-            {product ? 'Update Product' : 'Create Product'}
+          <button type="submit" disabled={isUploading} className="btn-primary w-full flex items-center justify-center gap-2">
+            {isUploading ? <Loader2 className="animate-spin" size={20} /> : null}
+            {isUploading ? 'Uploading & Saving...' : product ? 'Update Product' : 'Create Product'}
           </button>
         </form>
       </motion.div>

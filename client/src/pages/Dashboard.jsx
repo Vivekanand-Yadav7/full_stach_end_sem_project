@@ -117,7 +117,7 @@ const Dashboard = () => {
           <div className="space-y-4">
             {stats?.lowStockItems?.length > 0 ? (
               stats.lowStockItems.map((item) => (
-                <div key={item._id} className="flex items-center justify-between p-4 bg-red-50 rounded-2xl border border-red-100">
+                <div key={item.id || item._id} className="flex items-center justify-between p-4 bg-red-50 rounded-2xl border border-red-100">
                   <div className="flex items-center gap-4">
                     <img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-xl object-cover" />
                     <div>
@@ -146,7 +146,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold mb-6">Popular Products</h2>
           <div className="space-y-4">
             {stats?.mostOrdered?.map((item, index) => (
-              <div key={item._id} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors">
+              <div key={item.id || item._id} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors">
                 <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold rounded-lg text-sm">
                   #{index + 1}
                 </div>

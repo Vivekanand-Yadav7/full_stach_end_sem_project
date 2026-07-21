@@ -48,7 +48,10 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, requireRole('retailer'), async (req, res) => {
   try {
     const product = await prisma.product.create({
-      data: req.body
+      data: {
+        ...req.body,
+        retailerId: req.user.id
+      }
     });
     await indexProduct(product).catch(err => console.error("Qdrant index error:", err));
     res.status(201).json(product);
@@ -61,7 +64,7 @@ router.post('/', auth, requireRole('retailer'), async (req, res) => {
 router.put('/:id', auth, requireRole('retailer'), async (req, res) => {
   try {
     const product = await prisma.product.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id, retailerId: req.user.id },
       data: req.body
     });
     await indexProduct(product).catch(err => console.error("Qdrant index error:", err));
@@ -78,7 +81,7 @@ router.put('/:id', auth, requireRole('retailer'), async (req, res) => {
 router.delete('/:id', auth, requireRole('retailer'), async (req, res) => {
   try {
     await prisma.product.delete({
-      where: { id: req.params.id }
+      where: { id: req.params.id, retailerId: req.user.id }
     });
     await deleteProductVector(req.params.id).catch(err => console.error("Qdrant delete error:", err));
     res.json({ message: 'Product deleted' });

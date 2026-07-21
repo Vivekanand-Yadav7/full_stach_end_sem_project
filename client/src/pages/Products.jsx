@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Search, Filter, Edit2, Trash2, X, Loader2, Sparkles, Bot, Send } from 'lucide-react';
 import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 import { useNotification } from '../context/NotificationContext';
 
@@ -15,6 +16,7 @@ const Products = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
 
   const { addNotification } = useNotification();
+  const { user } = useAuth();
 
   // Smart Search state
   const [isSmartOpen, setIsSmartOpen] = useState(false);
@@ -40,7 +42,7 @@ const Products = () => {
   const handleSave = async (data) => {
     try {
       if (currentProduct) {
-        await api.put(`/products/${currentProduct._id}`, data);
+        await api.put(`/products/${currentProduct.id}`, data);
       } else {
         await api.post('/products', data);
       }
@@ -80,10 +82,13 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
-  );
+  // Only show products uploaded by this retailer, then apply search filter
+  const filteredProducts = products
+    .filter(p => p.retailerId === user?.id)
+    .filter(p =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.category.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <div className="space-y-8">
@@ -131,7 +136,7 @@ const Products = () => {
         <AnimatePresence>
           {filteredProducts.map((product, index) => (
             <motion.div
-              key={product._id}
+              key={product.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -155,7 +160,7 @@ const Products = () => {
                     <Edit2 size={20} />
                   </button>
                   <button 
-                    onClick={() => handleDelete(product._id)}
+                    onClick={() => handleDelete(product.id)}
                     className="p-3 bg-white text-red-500 rounded-full hover:scale-110 active:scale-95 transition-all"
                   >
                     <Trash2 size={20} />

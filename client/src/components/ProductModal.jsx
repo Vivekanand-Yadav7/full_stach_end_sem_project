@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, UploadCloud, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import api, { getBaseUrl } from '../api/axios';
+import api from '../api/axios';
 
 const ProductModal = ({ product, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -18,11 +18,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const getPredecidedImageUrl = (category) => {
-    if (!category) return '';
-    const name = category.toLowerCase().replace(' ', '');
-    return `${getBaseUrl()}/images/${name}.jpg`;
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,30 +87,20 @@ const ProductModal = ({ product, onClose, onSave }) => {
             </div>
             <div>
               <label className="text-sm font-semibold mb-1 block">Category</label>
-              <select 
+              <input 
+                type="text"
                 className="input-field"
+                placeholder="e.g. Sea Food"
                 value={formData.category}
                 onChange={(e) => {
-                  const newCategory = e.target.value;
-                  setFormData({
-                    ...formData, 
-                    category: newCategory,
-                    imageUrl: getPredecidedImageUrl(newCategory)
-                  });
+                  const val = e.target.value;
+                  const titleCased = val.split(' ').map(word => 
+                    word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''
+                  ).join(' ');
+                  setFormData({...formData, category: titleCased});
                 }}
                 required
-              >
-                <option value="">Select...</option>
-                <option value="Burger">Burger</option>
-                <option value="Sea Food">Sea Food</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Steak">Steak</option>
-                <option value="Pizza">Pizza</option>
-                <option value="Salad">Salad</option>
-                <option value="Beverage">Beverage</option>
-                <option value="Pasta">Pasta</option>
-                <option value="Sushi">Sushi</option>
-              </select>
+              />
             </div>
             <div>
               <label className="text-sm font-semibold mb-1 block">Quantity</label>
@@ -187,7 +173,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
                       }}
                     />
                   </label>
-                  <p className="text-xs text-slate-400 mt-2">Uploading replaces the pre-decided category image.</p>
+                  <p className="text-xs text-slate-400 mt-2">Please upload a photo for the product.</p>
                 </div>
               </div>
             </div>

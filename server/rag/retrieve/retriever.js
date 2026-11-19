@@ -7,6 +7,9 @@ const prisma = require("../../config/prisma.js");
 /**
  * Score a product's relevance to a query using keyword matching.
  * Weights: name (3x) > category (2x) > description (1x)
+ *
+ * Uses bidirectional matching so plural/variant query terms like
+ * "jalebies" still match the product named "Jalebi".
  */
 function keywordRelevanceScore(product, queryTerms) {
     let score = 0;
@@ -14,10 +17,29 @@ function keywordRelevanceScore(product, queryTerms) {
     const category = (product.category || "").toLowerCase();
     const description = (product.description || "").toLowerCase();
 
+    // Extract individual words from product fields for reverse matching
+    const nameWords = name.split(/[\s(),]+/).filter((w) => w.length > 2);
+    const categoryWords = category.split(/[\s(),]+/).filter((w) => w.length > 2);
+    const descWords = description.split(/[\s(),]+/).filter((w) => w.length > 2);
+
     for (const term of queryTerms) {
+        // Forward: product field contains the query term exactly
         if (name.includes(term)) score += 3;
         if (category.includes(term)) score += 2;
         if (description.includes(term)) score += 1;
+
+        // Reverse: query term contains a product field word
+        // e.g. "jalebies".includes("jalebi") → true ✅
+        // e.g. "burgers".includes("burger") → true ✅
+        for (const word of nameWords) {
+            if (term.includes(word) && !name.includes(term)) score += 3;
+        }
+        for (const word of categoryWords) {
+            if (term.includes(word) && !category.includes(term)) score += 2;
+        }
+        for (const word of descWords) {
+            if (term.includes(word) && !description.includes(term)) score += 1;
+        }
     }
     return score;
 }

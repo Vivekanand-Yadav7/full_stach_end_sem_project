@@ -6,7 +6,8 @@
     "build": "cd server && npm install && cd ../client && npm install && npm run build",
     "start": "node server/index.js",
     "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev"
+    "dev:client": "cd client && npm run dev",
+    "dev:model": "./.venv/bin/python server/model_server.py"
   },
   "engines": {
     "node": ">=18.0.0"

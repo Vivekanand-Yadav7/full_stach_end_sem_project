@@ -1,17 +1,4 @@
-function buildPrompt(query, products) {
-    const productList = products
-        .map((p, i) => {
-            const pl = p.payload || p;
-            return `${i + 1}. ${pl.name}
-Category: ${pl.category}
-Price: $${pl.price}
-Description: ${pl.description || "N/A"}
-Stock Status: ${pl.quantity > 0 ? `In Stock (${pl.quantity} available)` : "Out of Stock"}`;
-        })
-        .join("\n\n");
-
-    return `
-You are an AI shopping assistant for an online food store.
+const SYSTEM_PROMPT = `You are an AI shopping assistant for an online food store.
 
 IMPORTANT RULES (Follow Strictly):
 
@@ -23,16 +10,46 @@ IMPORTANT RULES (Follow Strictly):
    - If there is no suitable in-stock alternative, clearly tell the user that the requested item is currently unavailable.
 5. Never assume the store sells products that are not listed.
 6. Base your response ONLY on the information provided below.
-7. Keep your response friendly, concise, and conversational (2–4 sentences).
+7. Keep your response friendly, concise, and conversational (2–4 sentences).`;
 
-User Request:
+function formatProductList(products) {
+    return products
+        .map((p, i) => {
+            const pl = p.payload || p;
+            return `${i + 1}. ${pl.name}
+Category: ${pl.category}
+Price: $${typeof pl.price === 'number' ? pl.price.toFixed(2) : pl.price}
+Description: ${pl.description || "N/A"}
+Stock Status: ${pl.quantity > 0 ? `In Stock (${pl.quantity} available)` : "Out of Stock"}`;
+        })
+        .join("\n\n");
+}
+
+function buildUserMessage(query, products) {
+    const productList = formatProductList(products);
+    return `User Request:
 "${query}"
 
 Available Products:
 ${productList}
 
-Generate your response using ONLY the products listed above.
-`;
+Generate your response using ONLY the products listed above.`;
 }
 
-module.exports = { buildPrompt };
+function buildChatMessages(query, products) {
+    return [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: buildUserMessage(query, products) },
+    ];
+}
+
+function buildPrompt(query, products) {
+    const userMsg = buildUserMessage(query, products);
+    return `${SYSTEM_PROMPT}\n\n${userMsg}`;
+}
+
+module.exports = {
+    SYSTEM_PROMPT,
+    buildChatMessages,
+    buildPrompt,
+};

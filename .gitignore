@@ -34,7 +34,8 @@ Thumbs.db
 # Coverage directory used by tools like istanbul
 coverage/
 
-# Optional: if you have local uploads
-server/uploads/
-node_modules/
-.cache/
+# Python
+.venv/
+__pycache__/
+*.pyc
+

@@ -516,6 +516,7 @@ const Shop = () => {
                       <Sparkles size={14} className="absolute -top-1 -right-1 text-indigo-400 animate-pulse" />
                     </div>
                     <p className="text-sm text-slate-400 text-center">AI is searching products for you...</p>
+                    <p className="text-xs text-slate-300 text-center">(This may take up to 2 minutes — our fine-tuned model is thinking!)</p>
                   </div>
                 )}
 

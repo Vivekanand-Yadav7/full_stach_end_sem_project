@@ -22,6 +22,8 @@ const StatCard = ({ title, value, icon, color, delay }) => (
   </motion.div>
 );
 
+const FALLBACK_FOOD_IMG = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,12 @@ const Dashboard = () => {
               stats.lowStockItems.map((item) => (
                 <div key={item.id || item._id} className="flex items-center justify-between p-4 bg-red-50 rounded-2xl border border-red-100">
                   <div className="flex items-center gap-4">
-                    <img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-xl object-cover" />
+                    <img
+                      src={item.imageUrl || FALLBACK_FOOD_IMG}
+                      alt={item.name}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_FOOD_IMG; }}
+                      className="w-12 h-12 rounded-xl object-cover"
+                    />
                     <div>
                       <p className="font-semibold">{item.name}</p>
                       <p className="text-xs text-red-500 uppercase font-bold">{item.category}</p>
@@ -150,7 +157,12 @@ const Dashboard = () => {
                 <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold rounded-lg text-sm">
                   #{index + 1}
                 </div>
-                <img src={item.productDetails.imageUrl} alt={item.productDetails.name} className="w-12 h-12 rounded-xl object-cover" />
+                <img
+                  src={item.productDetails?.imageUrl || FALLBACK_FOOD_IMG}
+                  alt={item.productDetails?.name}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_FOOD_IMG; }}
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
                 <div className="flex-1">
                   <p className="font-semibold">{item.productDetails.name}</p>
                   <p className="text-xs text-slate-500">{item.count} items ordered</p>

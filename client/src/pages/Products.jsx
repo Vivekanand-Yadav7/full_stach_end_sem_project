@@ -8,6 +8,8 @@ import { useNotification } from '../context/NotificationContext';
 
 import ProductModal from '../components/ProductModal';
 
+const FALLBACK_FOOD_IMG = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
@@ -145,8 +147,9 @@ const Products = () => {
             >
               <div className="relative h-48 overflow-hidden">
                 <img 
-                  src={product.imageUrl} 
+                  src={product.imageUrl || FALLBACK_FOOD_IMG} 
                   alt={product.name} 
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_FOOD_IMG; }}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                 />
                 <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-xs font-bold text-primary shadow-sm">

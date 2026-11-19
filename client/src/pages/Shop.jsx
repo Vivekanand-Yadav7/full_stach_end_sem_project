@@ -6,6 +6,7 @@ import { useNotification } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = ['all', 'Burger', 'Sea Food', 'Dessert', 'Steak', 'Pizza', 'Salad', 'Beverage', 'Pasta', 'Sushi'];
+const FALLBACK_FOOD_IMG = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -177,8 +178,9 @@ const Shop = () => {
       >
         <div className="relative h-48 overflow-hidden">
           <img
-            src={product.imageUrl}
+            src={product.imageUrl || FALLBACK_FOOD_IMG}
             alt={product.name}
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_FOOD_IMG; }}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-xs font-bold text-primary shadow-sm">
@@ -438,7 +440,12 @@ const Shop = () => {
                 ) : (
                   cart.map((item) => (
                     <div key={item.product} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-2xl">
-                      <img src={item.imageUrl} alt={item.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                      <img
+                        src={item.imageUrl || FALLBACK_FOOD_IMG}
+                        alt={item.name}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_FOOD_IMG; }}
+                        className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate">{item.name}</p>
                         <p className="text-primary font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</p>
